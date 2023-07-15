@@ -1757,7 +1757,8 @@
               "header": "Configure battery system",
               "entity_para": "Pick sensors which measure energy going in to and out of the battery in either of {unit}.",
               "energy_into_battery": "Energy going in to the battery",
-              "energy_out_of_battery": "Energy coming out of the battery"
+              "energy_out_of_battery": "Energy coming out of the battery",
+              "battery_level": "Battery Level in %"
             }
           },
           "gas": {

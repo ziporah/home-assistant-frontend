@@ -59,6 +59,7 @@ export const emptyBatteryEnergyPreference =
     type: "battery",
     stat_energy_from: "",
     stat_energy_to: "",
+    battery_energy_level: "",
   });
 
 export const emptyGasEnergyPreference = (): GasSourceTypeEnergyPreference => ({
@@ -134,6 +135,7 @@ export interface BatterySourceTypeEnergyPreference {
   type: "battery";
   stat_energy_from: string;
   stat_energy_to: string;
+  battery_energy_level: string;
 }
 export interface GasSourceTypeEnergyPreference {
   type: "gas";
@@ -303,6 +305,9 @@ export const getReferencedStatisticIds = (
     if (source.type === "battery") {
       statIDs.push(source.stat_energy_from);
       statIDs.push(source.stat_energy_to);
+      if (source.battery_energy_level) {
+        statIDs.push(source.battery_energy_level);
+      }
       continue;
     }
 
@@ -393,6 +398,7 @@ const getEnergyData = async (
   const energyUnits: StatisticsUnitConfiguration = {
     energy: "kWh",
     volume: lengthUnit === "km" ? "m³" : "ft³",
+    unitless: "%",
   };
   const waterUnits: StatisticsUnitConfiguration = {
     volume: lengthUnit === "km" ? "L" : "gal",
@@ -408,6 +414,8 @@ const getEnergyData = async (
         "change",
       ])
     : {};
+
+  // const _batteryLevel = hass.sensor.battery_state_of_charge || 0;
 
   let statsCompare;
   let startCompare;
@@ -486,6 +494,7 @@ const getEnergyData = async (
     statsMetadataArray,
     fossilEnergyConsumption,
     fossilEnergyConsumptionCompare,
+    // batteryLevel,
   ] = await Promise.all([
     _energyStats,
     _waterStats,
@@ -494,6 +503,7 @@ const getEnergyData = async (
     _getStatisticMetadata,
     _fossilEnergyConsumption,
     _fossilEnergyConsumptionCompare,
+    // _batteryLevel,
   ]);
   const stats = { ...energyStats, ...waterStats };
   if (compare) {
@@ -519,6 +529,7 @@ const getEnergyData = async (
     co2SignalEntity,
     fossilEnergyConsumption,
     fossilEnergyConsumptionCompare,
+    // batteryLevel,
   };
 
   return data;

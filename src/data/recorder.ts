@@ -97,6 +97,7 @@ export interface StatisticsUnitConfiguration {
     | "psi"
     | "mmHg";
   temperature?: "°C" | "°F" | "K";
+  unitless?: "%";
   volume?: "L" | "gal" | "ft³" | "m³";
 }
 

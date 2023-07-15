@@ -523,7 +523,13 @@ class HuiEnergyDistrubutionCard
                 ${hasBattery
                   ? html` <div class="circle-container battery">
                       <div class="circle">
-                        <ha-svg-icon .path=${mdiBatteryHigh}></ha-svg-icon>
+                        <ha-svg-icon .path=${mdiBatteryHigh}> </ha-svg-icon>
+                        ${formatNumber(
+                          this.hass.battery_energy_level || 0,
+                          this.hass.locale,
+                          { maximumFractionDigits: 1 }
+                        )}
+                        %
                         <span class="battery-in">
                           <ha-svg-icon
                             class="small"

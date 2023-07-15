@@ -16,6 +16,7 @@ import { HomeAssistant } from "../../../../types";
 import { EnergySettingsBatteryDialogParams } from "./show-dialogs-energy";
 
 const energyUnitClasses = ["energy"];
+const batteryLevelUnitClasses = ["unitless"];
 
 @customElement("dialog-energy-battery-settings")
 export class DialogEnergyBatterySettings
@@ -30,6 +31,8 @@ export class DialogEnergyBatterySettings
 
   @state() private _energy_units?: string[];
 
+  @state() private _battery_level_units?: string[];
+
   @state() private _error?: string;
 
   public async showDialog(
@@ -41,6 +44,9 @@ export class DialogEnergyBatterySettings
       : emptyBatteryEnergyPreference();
     this._energy_units = (
       await getSensorDeviceClassConvertibleUnits(this.hass, "energy")
+    ).units;
+    this._battery_level_units = (
+      await getSensorDeviceClassConvertibleUnits(this.hass, "unitless")
     ).units;
   }
 
@@ -56,7 +62,11 @@ export class DialogEnergyBatterySettings
       return nothing;
     }
 
-    const pickableUnit = this._energy_units?.join(", ") || "";
+    const pickableUnit =
+      [
+        ...(this._energy_units || []),
+        ...(this._battery_level_units || []),
+      ]?.join(", ") || "";
 
     return html`
       <ha-dialog
@@ -80,13 +90,23 @@ export class DialogEnergyBatterySettings
 
         <ha-statistic-picker
           .hass=${this.hass}
+          .includeUnitClass=${batteryLevelUnitClasses}
+          .value=${this._source.battery_energy_level}
+          .label=${this.hass.localize(
+            "ui.panel.config.energy.battery.dialog.battery_level"
+          )}
+          @value-changed=${this._statisticBatteryLevelChanged}
+          dialogInitialFocus
+        ></ha-statistic-picker>
+
+        <ha-statistic-picker
+          .hass=${this.hass}
           .includeUnitClass=${energyUnitClasses}
           .value=${this._source.stat_energy_to}
           .label=${this.hass.localize(
             "ui.panel.config.energy.battery.dialog.energy_into_battery"
           )}
           @value-changed=${this._statisticToChanged}
-          dialogInitialFocus
         ></ha-statistic-picker>
 
         <ha-statistic-picker
@@ -105,7 +125,8 @@ export class DialogEnergyBatterySettings
         <mwc-button
           @click=${this._save}
           .disabled=${!this._source.stat_energy_from ||
-          !this._source.stat_energy_to}
+          !this._source.stat_energy_to ||
+          !this._source.battery_energy_level}
           slot="primaryAction"
         >
           ${this.hass.localize("ui.common.save")}
@@ -120,6 +141,15 @@ export class DialogEnergyBatterySettings
 
   private _statisticFromChanged(ev: CustomEvent<{ value: string }>) {
     this._source = { ...this._source!, stat_energy_from: ev.detail.value };
+  }
+
+  private _statisticBatteryLevelChanged(ev: CustomEvent<{ value: string }>) {
+    // this._source = { ...this._source!, battery_energy_level: ev.detail.value };
+    if (this._source!.battery_energy_level === null) {
+      this._source!.battery_energy_level = "";
+    } else {
+      this._source!.battery_energy_level = ev.detail.value;
+    }
   }
 
   private async _save() {
