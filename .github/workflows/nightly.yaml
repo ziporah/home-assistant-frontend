@@ -2,8 +2,8 @@ name: Nightly
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 1 * * *"
+  schedule: []
+    # - cron: "0 1 * * *"
 
 env:
   PYTHON_VERSION: "3.11"
